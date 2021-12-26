@@ -1,0 +1,4 @@
+io/flutter/plugins/GeneratedPluginRegistrant.java
+ io.flutter.plugins.GeneratedPluginRegistrant
+de/wagoit/capriole_app/BuildConfig.java
+ de.wagoit.capriole_app.BuildConfig
