@@ -3,9 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ZoneButton extends StatefulWidget {
-  const ZoneButton({Key? key, required this.zoneName}) : super(key: key);
+  const ZoneButton({Key? key, required this.zoneName, this.onClick}) : super(key: key);
 
   final String zoneName;
+  final Function? onClick;
 
   @override
   State<ZoneButton> createState() => _ZoneButtonState();
@@ -20,7 +21,7 @@ class _ZoneButtonState extends State<ZoneButton> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(25.0),
       child: Container(
-        padding: const EdgeInsets.only(left: 18, top: 20, bottom: 20),
+        padding: const EdgeInsets.only(left: 18, top: 20, bottom: 20, right: 8),
         height: 100,
         color: cardGrayColor,
         child: _buildLayout(),
@@ -75,5 +76,9 @@ class _ZoneButtonState extends State<ZoneButton> {
     setState(() {
       _zoneActive = test;
     });
+
+    if (widget.onClick != null) {
+      widget.onClick!();
+    }
   }
 }

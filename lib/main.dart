@@ -1,8 +1,10 @@
+import 'package:capriole_app/components/ship_view.dart';
 import 'package:capriole_app/components/zone_button.dart';
 import 'package:flutter/material.dart';
 
 const Color secondaryColor = Color(0xff37474F);
 const Color accentColor = Color(0xff1976D2);
+const Color accentDarkColor = Color(0xff1976D2);
 const Color lightGrayColor = Color(0xffB0BEC5);
 const Color cardGrayColor = Color(0xffF3F3F3);
 
@@ -55,6 +57,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  final GlobalKey<ShipViewState> _keyShipView = GlobalKey();
 
   void _incrementCounter() {
     setState(() {
@@ -82,11 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
         height: double.infinity,
         child: _buildContent(),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
@@ -109,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: _buildControls(),
               ),
               Container(
-                width: 10,
+                width: 20,
               ),
               Expanded(
                 flex: 1,
@@ -120,9 +118,33 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         Container(
           height: 100,
-          color: Colors.blue,
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(5, 22, 5, 22),
+          child: _buildSpotifyButton(),
         )
       ],
+    );
+  }
+
+  Widget _buildSpotifyButton() {
+    return ElevatedButton(
+      onPressed: _test,
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(accentDarkColor),
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          )
+        ),
+        textStyle: MaterialStateProperty.all<TextStyle>(
+            const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20
+            )
+        ),
+        shadowColor: MaterialStateProperty.all(accentColor),
+      ),
+      child: const Text("Spotify öffnen"),
     );
   }
 
@@ -132,27 +154,24 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          ZoneButton(zoneName: "Fly"),
-          ZoneButton(zoneName: "Achtern"),
-          ZoneButton(zoneName: "Salon"),
+        children: [
+          ZoneButton(zoneName: "Fly", onClick: _test),
+          const SizedBox(height: 10),
+          ZoneButton(zoneName: "Achtern", onClick: _test),
+          const SizedBox(height: 10),
+          ZoneButton(zoneName: "Salon", onClick: _test),
         ],
       )
     );
   }
 
-  Widget _test() {
-    return Container(
-      color: Colors.red,
-    );
+  _test() {
+    _keyShipView.currentState?.doRepeat();
   }
 
   Widget _buildGraphics() {
     return Container(
-      child: const RotatedBox(
-          quarterTurns: 1,
-          child: Image(image: AssetImage('graphics/ship-top.png'))
-      )
+      child: ShipView(key: _keyShipView)
     );
   }
 

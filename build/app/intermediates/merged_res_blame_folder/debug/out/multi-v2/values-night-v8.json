@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "G:\\Projekte\\AudioBoot\\capriole_app\\build\\app\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-night-v8\\values-night-v8.xml",
+            "outputFile": "C:\\Users\\gorb9\\Documents\\Projekte\\AudioBoot\\CaprioleApp\\build\\app\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-night-v8\\values-night-v8.xml",
             "map": [
                 {
-                    "source": "G:\\Projekte\\AudioBoot\\capriole_app\\android\\app\\src\\main\\res\\values-night\\styles.xml",
+                    "source": "C:\\Users\\gorb9\\Documents\\Projekte\\AudioBoot\\CaprioleApp\\android\\app\\src\\main\\res\\values-night\\styles.xml",
                     "from": {
                         "startLines": "3,14",
                         "startColumns": "4,4",
