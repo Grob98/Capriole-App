@@ -2,11 +2,15 @@ import 'package:capriole_app/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+const Color firstColor = Color(0xff338BE1);
+const Color secondColor = Color(0xff539EE8);
+const Color markColor = Color(0xff3474B2);
+
 class ZoneButton extends StatefulWidget {
   const ZoneButton({Key? key, required this.zoneName, this.onClick}) : super(key: key);
 
   final String zoneName;
-  final Function? onClick;
+  final Function(bool)? onClick;
 
   @override
   State<ZoneButton> createState() => _ZoneButtonState();
@@ -23,9 +27,27 @@ class _ZoneButtonState extends State<ZoneButton> {
       child: Container(
         padding: const EdgeInsets.only(left: 18, top: 20, bottom: 20, right: 8),
         height: 100,
-        color: cardGrayColor,
+        //color: cardGrayColor,
         child: _buildLayout(),
+
+        decoration: _buildCardBackground()
       )
+    );
+  }
+
+  BoxDecoration _buildCardBackground() {
+    return _zoneActive ? const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            firstColor,
+            secondColor,
+          ],
+        ),
+        color: cardGrayColor
+    ) : const BoxDecoration(
+        color: cardGrayColor
     );
   }
 
@@ -42,10 +64,10 @@ class _ZoneButtonState extends State<ZoneButton> {
   Widget _buildSubtitle() {
     return Text(
       widget.zoneName,
-      style: const TextStyle(
+      style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: secondaryColor
+          color: (_zoneActive ? Colors.white : secondaryColor)
       ),
     );
   }
@@ -66,7 +88,7 @@ class _ZoneButtonState extends State<ZoneButton> {
         CupertinoSwitch(
           value: _zoneActive,
           onChanged: _test,
-          activeColor: Colors.blue,
+          activeColor: markColor,
         )
       ]
     );
@@ -78,7 +100,7 @@ class _ZoneButtonState extends State<ZoneButton> {
     });
 
     if (widget.onClick != null) {
-      widget.onClick!();
+      widget.onClick!(test);
     }
   }
 }

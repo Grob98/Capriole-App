@@ -1,14 +1,13 @@
-import 'dart:async';
-import 'dart:math';
-import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:flutter/cupertino.dart';
+import 'package:capriole_app/components/zone_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ShipView extends StatefulWidget {
-  const ShipView({Key? key}) : super(key: key);
+  ZoneStatus status;
+
+  ShipView({Key? key, required this.status}) : super(key: key);
 
   @override
   State<ShipView> createState() => ShipViewState();
@@ -17,8 +16,16 @@ class ShipView extends StatefulWidget {
 class ShipViewState extends State<ShipView> with TickerProviderStateMixin {
 
   ui.Image? _imageBasic;
-  ui.Image? _imageTest;
-  int _imageIndex = 0;
+  ui.Image? _imageBasicOff;
+  ui.Image? _imageBasicSalon;
+  ui.Image? _imageBasicAchtern;
+  ui.Image? _imageBasicOn;
+  ui.Image? _imageFly;
+  ui.Image? _imageFlyOff;
+  ui.Image? _imageFlyOn;
+
+  //Status
+  bool _isFly = false;
 
   final Tween<double> _scaleTween = Tween(begin: 4, end: 1);
   Animation<double>? animation;
@@ -27,8 +34,12 @@ class ShipViewState extends State<ShipView> with TickerProviderStateMixin {
   @override
   initState() {
     super.initState();
-    _loadShipBasic();
-    _loadShipTest();
+    _loadShipBasicOff();
+    _loadShipBasicAchtern();
+    _loadShipBasicSalon();
+    _loadShipBasicOn();
+    _loadShipFly();
+    _loadShipFlyOn();
 
     controller = AnimationController(
       vsync: this,
@@ -36,38 +47,113 @@ class ShipViewState extends State<ShipView> with TickerProviderStateMixin {
     );
 
     animation = _scaleTween.animate(controller!)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.forward) {
+          _isFly = true;
+        }else if (status == AnimationStatus.reverse) {
+          _isFly = true;
+        }else if (status == AnimationStatus.completed) {
+          _isFly = true;
+        }else if (status == AnimationStatus.dismissed) {
+          _isFly = false;
+        }
+      })
       ..addListener(() {
         setState(() {});
       });
-
-    controller?.forward();
   }
 
-  doRepeat() {
-    controller?.reset();
-    _imageIndex = 1;
-    controller?.forward();
+  updateImages() {
+    setState(() {
+      if (widget.status.zoneSalon && widget.status.zoneAchtern) {
+        _imageBasic = _imageBasicOn;
+      }else if (widget.status.zoneSalon) {
+        _imageBasic = _imageBasicSalon;
+      }else if (widget.status.zoneAchtern) {
+        _imageBasic = _imageBasicAchtern;
+      }else {
+        _imageBasic = _imageBasicOff;
+      }
+
+      if (widget.status.zoneFly) {
+        _imageFly = _imageFlyOn;
+      }else {
+        _imageFly = _imageFlyOff;
+      }
+    });
+
   }
 
-  _loadShipBasic() async {
-    ByteData bd = await rootBundle.load("graphics/ship-top.png");
+  setFly(bool isActive) {
+    if (isActive) {
+      controller?.forward();
+    }else{
+      controller?.reverse();
+    }
+  }
+
+  setSalonActive() {
+    setFly(false);
+    updateImages();
+  }
+
+  setAchternActive() {
+    setFly(false);
+    updateImages();
+  }
+
+  setFlyActive() {
+    setFly(true);
+    updateImages();
+  }
+
+  _loadShipBasicOff() async {
+    ByteData bd = await rootBundle.load("graphics/ship-bottom.png");
     ui.decodeImageFromList(_loadImage(bd), (ui.Image uiImage) {
-      setState(() => _imageBasic = uiImage);
+      _imageBasicOff = uiImage;
+      setState(() => _imageBasic = _imageBasicOff);
     });
   }
 
-  _loadShipTest() async {
-    ByteData bd = await rootBundle.load("graphics/ship-test.png");
+  _loadShipBasicOn() async {
+    ByteData bd = await rootBundle.load("graphics/ship-bottom-on.png");
     ui.decodeImageFromList(_loadImage(bd), (ui.Image uiImage) {
-      setState(() => _imageTest = uiImage);
+      _imageBasicOn = uiImage;
+    });
+  }
+
+  _loadShipBasicAchtern() async {
+    ByteData bd = await rootBundle.load("graphics/ship-bottom-achtern.png");
+    ui.decodeImageFromList(_loadImage(bd), (ui.Image uiImage) {
+      _imageBasicAchtern = uiImage;
+    });
+  }
+
+  _loadShipBasicSalon() async {
+    ByteData bd = await rootBundle.load("graphics/ship-bottom-salon.png");
+    ui.decodeImageFromList(_loadImage(bd), (ui.Image uiImage) {
+      _imageBasicSalon = uiImage;
+    });
+  }
+
+  _loadShipFly() async {
+    ByteData bd = await rootBundle.load("graphics/ship-fly.png");
+    ui.decodeImageFromList(_loadImage(bd), (ui.Image uiImage) {
+      _imageFlyOff = uiImage;
+    });
+  }
+
+  _loadShipFlyOn() async {
+    ByteData bd = await rootBundle.load("graphics/ship-fly-on.png");
+    ui.decodeImageFromList(_loadImage(bd), (ui.Image uiImage) {
+      _imageFlyOn = uiImage;
     });
   }
 
   Uint8List _loadImage(ByteData bd) {
     final Uint8List bytes = Uint8List.view(bd.buffer);
-    img.Image? image = img.decodeImage(bytes);
-    image = img.copyRotate(image!, 90);
-    return Uint8List.fromList(img.encodePng(image));
+    //img.Image? image = img.decodeImage(bytes);
+    return bytes;
   }
 
   @override
@@ -85,7 +171,7 @@ class ShipViewState extends State<ShipView> with TickerProviderStateMixin {
         }
       },
       child: CustomPaint(
-        painter: ShipPainter(_imageBasic, _imageTest, _imageIndex, animation!.value),
+        painter: ShipPainter(_imageBasic, _imageFly, _isFly, animation!.value),
         size: const Size(double.infinity, double.infinity),
       ),
     );
@@ -99,22 +185,60 @@ class ShipViewState extends State<ShipView> with TickerProviderStateMixin {
   }
 }
 
-class ShipPainter extends CustomPainter {
-  ui.Image? imageBasic;
-  ui.Image? imageTest;
+/*class ShipPainter extends CustomPainter {
+  DrawableRoot? imageBasic;
+  DrawableRoot? imageTest;
   int imageIndex;
   double scale;
 
   ShipPainter(this.imageBasic, this.imageTest, this.imageIndex, this.scale) : super();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if(imageBasic != null){
+      imageBasic?.scaleCanvasToViewBox(canvas, size);
+      imageBasic?.clipCanvasToViewBox(canvas);
+      imageBasic?.draw(canvas, Rect.fromLTWH(0, 0, size.width, size.height));
+    }
+
+    if(imageTest != null){
+      imageTest?.scaleCanvasToViewBox(canvas, size);
+      imageTest?.clipCanvasToViewBox(canvas);
+      imageTest?.draw(canvas, Rect.fromLTWH(0, 0, size.width, size.height));
+    }
+
+    /*print(imageIndex);
+
+    if (imageTest != null && imageIndex == 1) {
+      Size test = Size(size.width * scale, size.height * scale);
+      Rect scaledImage = Rect.fromLTWH(
+          0, 0, size.width, size.height
+      );
+      imageTest?.scaleCanvasToViewBox(canvas, size);
+      imageTest?.clipCanvasToViewBox(canvas);
+      imageTest?.draw(canvas, scaledImage);
+    }*/
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    ShipPainter old = (oldDelegate as ShipPainter);
+    return imageBasic != old.imageBasic || imageTest != old.imageTest
+        || imageIndex != old.imageIndex || scale != old.scale;
+    //return true;
+  }
+}*/
+
+class ShipPainter extends CustomPainter {
+  ui.Image? imageBasic;
+  ui.Image? imageTest;
+  bool isFly;
+  double scale;
+
+  ShipPainter(this.imageBasic, this.imageTest, this.isFly, this.scale) : super();
   
   @override
   void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..color = Colors.red
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
-
     Rect canvasRect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.clipRect(canvasRect);
 
@@ -138,17 +262,17 @@ class ShipPainter extends CustomPainter {
         alignment: Alignment.center,
         flipHorizontally: false,
         filterQuality: FilterQuality.high,
-        opacity: 1.0
+        opacity: 1.0,
+        isAntiAlias: true,
       );
     }
 
-    if (imageTest != null && imageIndex == 1) {
+    if (imageTest != null && isFly == true) {
       Rect scaledImage = Rect.fromCenter(
           center: Offset(size.width / 2, size.height / 2),
           width: size.width * scale,
           height: size.height * scale
       );
-      //Rect scaledImage = Rect.fromLTWH((0 - opScale * size.width), 0, size.width + (scale * size.width), size.height * scale);
 
       paintImage(
           canvas: canvas,
@@ -163,16 +287,14 @@ class ShipPainter extends CustomPainter {
           opacity: 1.0 * (1.0 - opScale / 3.0)
       );
     }
-
-    //canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
-    //canvas.drawPath(path, paint);
   }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     ShipPainter old = (oldDelegate as ShipPainter);
     return imageBasic != old.imageBasic || imageTest != old.imageTest
-        || imageIndex != old.imageIndex || scale != old.scale;
+        || isFly != old.isFly || scale != old.scale;
     //return true;
   }
 }
+

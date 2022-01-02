@@ -1,5 +1,6 @@
 import 'package:capriole_app/components/ship_view.dart';
 import 'package:capriole_app/components/zone_button.dart';
+import 'package:capriole_app/components/zone_status.dart';
 import 'package:flutter/material.dart';
 
 const Color secondaryColor = Color(0xff37474F);
@@ -56,14 +57,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   final GlobalKey<ShipViewState> _keyShipView = GlobalKey();
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  final ZoneStatus _status = ZoneStatus(false, false, false);
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildSpotifyButton() {
     return ElevatedButton(
-      onPressed: _test,
+      onPressed: _setFlyActive(true),
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(accentDarkColor),
         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -155,23 +150,34 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ZoneButton(zoneName: "Fly", onClick: _test),
+          ZoneButton(zoneName: "Fly", onClick: _setFlyActive),
           const SizedBox(height: 10),
-          ZoneButton(zoneName: "Achtern", onClick: _test),
+          ZoneButton(zoneName: "Achtern", onClick: _setAchternActive),
           const SizedBox(height: 10),
-          ZoneButton(zoneName: "Salon", onClick: _test),
+          ZoneButton(zoneName: "Salon", onClick: _setSalonActive),
         ],
       )
     );
   }
 
-  _test() {
-    _keyShipView.currentState?.doRepeat();
+  _setFlyActive(bool isActive) {
+    _status.zoneFly = isActive;
+    _keyShipView.currentState?.setFlyActive();
+  }
+
+  _setAchternActive(bool isActive) {
+    _status.zoneAchtern = isActive;
+    _keyShipView.currentState?.setAchternActive();
+  }
+
+  _setSalonActive(bool isActive) {
+    _status.zoneSalon = isActive;
+    _keyShipView.currentState?.setSalonActive();
   }
 
   Widget _buildGraphics() {
     return Container(
-      child: ShipView(key: _keyShipView)
+      child: ShipView(key: _keyShipView, status: _status)
     );
   }
 
